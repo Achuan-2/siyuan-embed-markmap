@@ -149,7 +149,7 @@ enum SyFrontendTypes {
   'browser-mobile' = 'browser-mobile',
 }
 
-interface MindmapImageInfo {
+interface MarkmapImageInfo {
   imageURL: string;
   data: string;
   format: "svg" | "png";

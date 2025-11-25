@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markmap 编辑器</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden;
+    }
+
+    /* 容器布局 */
+    .container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* 左侧编辑器 */
+    .editor-panel {
+      width: 40%;
+      display: flex;
+      flex-direction: column;
+      border-right: 2px solid #e0e0e0;
+      background-color: #f5f5f5;
+    }
+
+    .editor-header {
+      padding: 15px 20px;
+      background-color: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .editor-header h2 {
+      font-size: 18px;
+      color: #333;
+    }
+
+    .editor-header .info {
+      font-size: 12px;
+      color: #666;
+    }
+
+    #markdown-input {
+      flex: 1;
+      padding: 20px;
+      border: none;
+      outline: none;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: none;
+      background-color: #fff;
+    }
+
+    /* 右侧预览 */
+    .preview-panel {
+      width: 60%;
+      position: relative;
+      background-color: #fafafa;
+    }
+
+    .preview-header {
+      padding: 15px 20px;
+      background-color: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .preview-header h2 {
+      font-size: 18px;
+      color: #333;
+    }
+
+    #mindmap {
+      width: 100%;
+      height: calc(100% - 60px);
+    }
+
+
+
+    /* 按钮样式 */
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s;
+      margin-left: 10px;
+    }
+
+    .btn-primary {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #45a049;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: #0b7dda;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    /* 分隔栏 */
+    .resize-handle {
+      position: absolute;
+      left: 40%;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      cursor: col-resize;
+      background-color: #e0e0e0;
+      z-index: 1000;
+      transition: background-color 0.2s;
+    }
+
+    .resize-handle:hover,
+    .resize-handle.active {
+      background-color: #2196F3;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .editor-panel,
+      .preview-panel {
+        width: 100% !important;
+      }
+
+      .editor-panel {
+        height: 40%;
+        border-right: none;
+        border-bottom: 2px solid #e0e0e0;
+      }
+
+      .preview-panel {
+        height: 60%;
+      }
+
+      .resize-handle {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- 左侧编辑器 -->
+    <div class="editor-panel">
+      <div class="editor-header">
+        <h2>📝 Markdown 编辑器</h2>
+        <span class="info">实时预览</span>
+      </div>
+      <textarea id="markdown-input" placeholder="在这里输入 Markdown..."># 思维导图示例
+
+## 前端技术栈
+
+### JavaScript
+- ES6+
+- TypeScript
+- 异步编程
+
+### 框架
+- React
+- Vue
+- Angular
+
+### 工具链
+- Webpack
+- Vite
+- Babel
+
+## 后端技术
+
+### Node.js
+- Express
+- Koa
+- NestJS
+
+### 数据库
+- MySQL
+- MongoDB
+- Redis
+
+## DevOps
+
+### 容器化
+- Docker
+- Kubernetes
+
+### CI/CD
+- Jenkins
+- GitHub Actions
+- GitLab CI</textarea>
+    </div>
+
+    <!-- 可拖动的分隔栏 -->
+    <div class="resize-handle"></div>
+
+    <!-- 右侧预览 -->
+    <div class="preview-panel">
+      <div class="preview-header">
+        <h2>🗺️ 思维导图预览</h2>
+        <div>
+          <button class="btn btn-secondary" onclick="fitView()">📍 适应窗口</button>
+          <button class="btn btn-primary" onclick="exportSVG()">📥 导出 SVG</button>
+        </div>
+      </div>
+      <svg id="mindmap"></svg>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/markmap-lib@0.14.4/dist/browser/index.min.js"></script>
+  <script src="https://unpkg.com/d3@6.7.0/dist/d3.min.js"></script>
+  <script src="https://unpkg.com/markmap-view@0.14.4/dist/index.min.js"></script>
+
+  <script>
+    const { markmap } = window;
+    const { Markmap, loadCSS, loadJS, Transformer } = markmap;
+    const transformer = new Transformer();
+
+    let markmapInstance = null;
+    const options = {
+      duration: 0, // 禁用动画
+      maxWidth: 300,
+      nodeMinHeight: 16,
+      spacingVertical: 5,
+      spacingHorizontal: 80,
+      paddingX: 8
+    };
+
+    // 初始化 markmap
+    function initMarkmap(markdown) {
+      const { root, features } = transformer.transform(markdown);
+      const { styles, scripts } = transformer.getUsedAssets(features);
+      
+      if (styles) loadCSS(styles);
+      if (scripts) loadJS(scripts, { getMarkmap: () => markmap });
+      
+      markmapInstance = Markmap.create("#mindmap", options, root);
+    }
+
+    // 只更新变化的内容
+    function updateContent(newMarkdown) {
+      if (!markmapInstance) {
+        initMarkmap(newMarkdown);
+        return;
+      }
+      
+      try {
+        const { root } = transformer.transform(newMarkdown);
+        markmapInstance.setData(root);
+        markmapInstance.fit(); // 自动适应视图
+      } catch (error) {
+        console.error('更新失败:', error);
+      }
+    }
+
+    // 防抖函数
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // 监听输入变化
+    const markdownInput = document.getElementById('markdown-input');
+    const debouncedUpdate = debounce((value) => {
+      updateContent(value);
+    }, 300);
+
+    markdownInput.addEventListener('input', (e) => {
+      debouncedUpdate(e.target.value);
+    });
+
+    // 初始化
+    initMarkmap(markdownInput.value);
+
+    // 适应窗口
+    function fitView() {
+      if (markmapInstance) {
+        markmapInstance.fit();
+      }
+    }
+
+    // 导出 SVG
+    function exportSVG() {
+      try {
+        const svgElement = document.getElementById('mindmap');
+        const clonedSvg = svgElement.cloneNode(true);
+        
+        const bbox = svgElement.getBBox();
+        clonedSvg.setAttribute('viewBox', `${bbox.x - 20} ${bbox.y - 20} ${bbox.width + 40} ${bbox.height + 40}`);
+        clonedSvg.setAttribute('width', bbox.width + 40);
+        clonedSvg.setAttribute('height', bbox.height + 40);
+        clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        clonedSvg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+        
+        // 内联样式
+        const styles = Array.from(document.styleSheets)
+          .filter(sheet => {
+            try {
+              return sheet.cssRules;
+            } catch (e) {
+              return false;
+            }
+          })
+          .reduce((acc, sheet) => {
+            return acc + Array.from(sheet.cssRules).map(rule => rule.cssText).join('\n');
+          }, '');
+        
+        const styleElement = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+        styleElement.textContent = styles;
+        clonedSvg.insertBefore(styleElement, clonedSvg.firstChild);
+        
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(clonedSvg);
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `markmap-${Date.now()}.svg`;
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        console.log('✅ SVG 导出成功！');
+      } catch (error) {
+        console.error('❌ 导出 SVG 失败:', error);
+        alert('导出失败，请查看控制台');
+      }
+    }
+
+    // 可拖动分隔栏
+    const resizeHandle = document.querySelector('.resize-handle');
+    const editorPanel = document.querySelector('.editor-panel');
+    const previewPanel = document.querySelector('.preview-panel');
+    let isResizing = false;
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      resizeHandle.classList.add('active');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      
+      const containerWidth = document.querySelector('.container').offsetWidth;
+      const newLeftWidth = (e.clientX / containerWidth) * 100;
+      
+      if (newLeftWidth > 20 && newLeftWidth < 80) {
+        editorPanel.style.width = `${newLeftWidth}%`;
+        previewPanel.style.width = `${100 - newLeftWidth}%`;
+        resizeHandle.style.left = `${newLeftWidth}%`;
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isResizing) {
+        isResizing = false;
+        resizeHandle.classList.remove('active');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        
+        // 调整大小后重新适应视图
+        setTimeout(() => fitView(), 100);
+      }
+    });
+
+    // 键盘快捷键
+    document.addEventListener('keydown', (e) => {
+      // Ctrl/Cmd + S: 导出
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        exportSVG();
+      }
+      // Ctrl/Cmd + E: 适应窗口
+      if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault();
+        fitView();
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -73,11 +73,11 @@ export default defineConfig(({
             dest: "./i18n/",
           },
           {
-            src: "./mindmap-web/index.html",
+            src: "./markmap-web/index.html",
             dest: "./mind/",
           },
           {
-            src: "./mindmap-web/dist/**",
+            src: "./markmap-web/dist/**",
             dest: "./mind/dist/",
           }
         ],

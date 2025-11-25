@@ -1,5 +1,5 @@
-.mindmap-edit-dialog,
-.mindmap-lightbox-dialog {
+.markmap-edit-dialog,
+.markmap-lightbox-dialog {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -36,7 +36,7 @@
     }
 }
 
-.mindmap-edit-tab {
+.markmap-edit-tab {
     height: 100%;
     padding: 0;
     display: flex;
@@ -52,10 +52,10 @@
     }
 }
 
-html[data-theme-mode="dark"] img[src^="assets/mindmap-"] {
+html[data-theme-mode="dark"] img[src^="assets/markmap-"] {
     filter: invert(0.8) brightness(1.2);
 }
 
-div[data-type='NodeParagraph']:not(:hover) .protyle-attr .label--embed-mindmap:not(.label--embed-mindmap--always) {
+div[data-type='NodeParagraph']:not(:hover) .protyle-attr .label--embed-markmap:not(.label--embed-markmap--always) {
   display: none !important;
 }

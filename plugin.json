@@ -1,7 +1,7 @@
 {
-  "name": "siyuan-embed-mindmap",
+  "name": "siyuan-embed-markmap",
   "author": "Achuan-2",
-  "url": "https://github.com/Achuan-2/siyuan-embed-mindmap",
+  "url": "https://github.com/Achuan-2/siyuan-embed-markmap",
   "version": "1.0.2",
   "minAppVersion": "3.0.0",
   "disabledInPublish": true,
@@ -12,12 +12,12 @@
     "all"
   ],
   "displayName": {
-    "default": "「Embed Series」Mind Map",
-    "zh_CN": "「嵌入式系列」思维导图"
+    "default": "「Embed Series」Markmap",
+    "zh_CN": "「嵌入式系列」Markmap"
   },
   "description": {
-    "default": "「Embed Series」Create editable Mind Map with simple-mind-map",
-    "zh_CN": "「嵌入式系列」使用 simple-mind-map 创建可编辑的思维导图"
+    "default": "「Embed Series」Create editable Markmap with markmap",
+    "zh_CN": "「嵌入式系列」使用 markmap 创建可编辑的思维导图图片"
   },
   "readme": {
     "default": "README.md",
@@ -26,5 +26,5 @@
   "funding": {
     "custom": []
   },
-  "keywords": ["mindmap", "思维导图"]
+  "keywords": ["markmap", "思维导图"]
 }
