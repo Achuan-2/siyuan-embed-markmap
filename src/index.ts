@@ -20,6 +20,7 @@ import {
 } from "./utils";
 import { Transformer } from 'markmap-lib';
 import { Markmap, loadCSS, loadJS } from 'markmap-view';
+import Vditor from 'vditor';
 
 let PluginInfo = {
   version: '',
@@ -491,9 +492,8 @@ export default class MarkmapPlugin extends Plugin {
       <div class="edit-dialog-editor" style="width:40%;display:flex;flex-direction:column;border-right:2px solid #e0e0e0;min-width:220px;">
         <div class="editor-header" style="padding:15px 20px;background-color:#fff;border-bottom:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;">
           <h2 style="font-size:18px;color:#333;">📝 Markdown 编辑器</h2>
-          <span style="font-size:12px;color:#666;">实时预览</span>
         </div>
-        <textarea class="markmap-editor-textarea" style="flex:1;height:100%;width:100%;box-sizing:border-box;padding:20px;font-family:monospace;border:none;outline:none;background-color:#fff;resize:none;" placeholder="# Write markdown for markmap"></textarea>
+        <div id="vditor-editor" style="flex:1;height:100%;width:100%;"></div>
       </div>
       <div class="resize-handle" style="opacity:0;width:4px;background-color:#e0e0e0;cursor:col-resize;z-index:1000;transition:background-color 0.2s;position:absolute;top:0;height:100%;left:40%;">
       </div>
@@ -522,6 +522,10 @@ export default class MarkmapPlugin extends Plugin {
       height: "80vh",
       hideCloseIcon: this.isMobile,
       destroyCallback: () => {
+        if (vditorInstance) {
+          vditorInstance.destroy();
+          vditorInstance = null;
+        }
         dialogDestroyCallbacks.forEach(callback => callback());
       },
     });
@@ -571,12 +575,70 @@ export default class MarkmapPlugin extends Plugin {
       });
     }
 
-    const textarea = dialog.element.querySelector('.markmap-editor-textarea') as HTMLTextAreaElement;
+    // Load Vditor CSS
+    const vditorCssId = 'vditor-css';
+    if (!document.getElementById(vditorCssId)) {
+      const linkEl = document.createElement('link');
+      linkEl.id = vditorCssId;
+      linkEl.rel = 'stylesheet';
+      linkEl.href = 'https://unpkg.com/vditor@3.11.2/dist/index.css';
+      document.head.appendChild(linkEl);
+      dialogDestroyCallbacks.push(() => {
+        const el = document.getElementById(vditorCssId);
+        if (el) el.remove();
+      });
+    }
+
     const svgEl = dialog.element.querySelector('#markmap') as SVGElement;
     const resizeHandle = dialog.element.querySelector('.resize-handle') as HTMLElement;
     const editorPanel = dialog.element.querySelector('.edit-dialog-editor') as HTMLElement;
     const previewPanel = dialog.element.querySelector('.edit-dialog-preview') as HTMLElement;
-    textarea.focus();
+
+    // Initialize Vditor
+    let vditorInstance: Vditor | null = null;
+    const initVditor = async (initialValue: string) => {
+      vditorInstance = new Vditor('vditor-editor', {
+        height: '100%',
+        mode: 'ir', // Instant Rendering mode, similar to Typora
+        value: initialValue,
+        placeholder: '# Write markdown for markmap',
+        cache: { enable: false },
+        toolbar: [
+          'emoji',
+          'headings',
+          'bold',
+          'italic',
+          'strike',
+          '|',
+          'line',
+          'quote',
+          'list',
+          'ordered-list',
+          'check',
+          '|',
+          'code',
+          'inline-code',
+          'link',
+          'table',
+          '|',
+          'undo',
+          'redo',
+          '|',
+          'edit-mode', // Switch between IR and SV modes
+          'outline',
+        ],
+        counter: { enable: true, type: 'markdown' },
+        outline: { enable: false, position: 'right' },
+        input: (value: string) => {
+          renderMarkmap(value);
+          debouncedSave(value);
+        },
+        after: () => {
+          console.log('Vditor initialized');
+          renderMarkmap(initialValue);
+        },
+      });
+    };
 
     // ensure resize handle height and initial left matches editor width
     try {
@@ -791,6 +853,10 @@ export default class MarkmapPlugin extends Plugin {
         }
         mmInstance.setData(root);
         mmInstance.fit();
+        // 延迟再次调用 fit 以确保 dialog 完全打开后视图适应
+        setTimeout(() => {
+          if (mmInstance) mmInstance.fit();
+        }, 100);
       } catch (e) {
         console.error('renderMarkmap error', e);
       }
@@ -914,30 +980,14 @@ export default class MarkmapPlugin extends Plugin {
           if (resp && resp.data && resp.data['custom-markmap']) {
             mindMapData = resp.data['custom-markmap'];
           }
-          textarea.value = mindMapData || '';
-          // initial render
-          renderMarkmap(textarea.value);
+          initVditor(mindMapData || '');
         });
       } catch (err) {
-        textarea.value = '';
-        renderMarkmap('');
+        initVditor('');
       }
     } else {
-      textarea.value = '';
-      renderMarkmap('');
+      initVditor('');
     }
-
-    // input handler: live render + debounced save/export
-    const onTextareaInput = (e: Event) => {
-      const v = (e.target as HTMLTextAreaElement).value;
-      renderMarkmap(v);
-      debouncedSave(v);
-    };
-    textarea.addEventListener('input', onTextareaInput);
-
-    dialogDestroyCallbacks.push(() => {
-      textarea.removeEventListener('input', onTextareaInput);
-    });
   }
 
 

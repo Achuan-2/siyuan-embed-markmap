@@ -26,7 +26,8 @@
     "markmap-toolbar": "^0.18.12",
     "markmap-view": "^0.18.12",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "vditor": "^3.11.2"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.8.1",
