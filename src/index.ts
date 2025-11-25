@@ -5,6 +5,7 @@ import {
   IWebSocketData,
 } from "siyuan";
 import "@/index.scss";
+import "@/vidtor/index.css"
 import PluginInfoString from '@/../plugin.json';
 import {
   getImageSizeFromBase64,
@@ -575,19 +576,7 @@ export default class MarkmapPlugin extends Plugin {
       });
     }
 
-    // Load Vditor CSS
-    const vditorCssId = 'vditor-css';
-    if (!document.getElementById(vditorCssId)) {
-      const linkEl = document.createElement('link');
-      linkEl.id = vditorCssId;
-      linkEl.rel = 'stylesheet';
-      linkEl.href = 'https://unpkg.com/vditor@3.11.2/dist/index.css';
-      document.head.appendChild(linkEl);
-      dialogDestroyCallbacks.push(() => {
-        const el = document.getElementById(vditorCssId);
-        if (el) el.remove();
-      });
-    }
+
 
     const svgEl = dialog.element.querySelector('#markmap') as SVGElement;
     const resizeHandle = dialog.element.querySelector('.resize-handle') as HTMLElement;

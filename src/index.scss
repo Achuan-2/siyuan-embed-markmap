@@ -59,3 +59,9 @@ html[data-theme-mode="dark"] img[src^="assets/markmap-"] {
 div[data-type='NodeParagraph']:not(:hover) .protyle-attr .label--embed-markmap:not(.label--embed-markmap--always) {
   display: none !important;
 }
+
+// 文字优化400
+.markmap-foreign>div>div {
+    display: inline-block;
+    font-weight: 400;
+}
