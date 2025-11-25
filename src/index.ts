@@ -618,6 +618,11 @@ export default class MarkmapPlugin extends Plugin {
         ],
         counter: { enable: true, type: 'markdown' },
         outline: { enable: false, position: 'right' },
+        keydown: (event: KeyboardEvent) => {
+          if ((event.ctrlKey || event.metaKey) && (event.key === 'a' || event.key === 'z' || event.key === 'y')) {
+            event.stopPropagation();
+          }
+        },
         input: (value: string) => {
           renderMarkmap(value);
           debouncedSave(value);

@@ -17,7 +17,7 @@
     "release:major": "node ./release.js --mode=major",
     "build:app": "vite build --config vite.app.config.ts",
     "build:plugin": "vite build",
-    "build": "pnpm build:app && pnpm build:plugin"
+    "build": "pnpm build:plugin"
   },
   "dependencies": {
     "d3": "^7.9.0",
