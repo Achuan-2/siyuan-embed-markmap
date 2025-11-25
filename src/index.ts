@@ -75,9 +75,9 @@ export default class MarkmapPlugin extends Plugin {
     });
 
     this.protyleSlash = [{
-      filter: ["mindmap", "markmap"],
+      filter: ["mindmap", "markmap","思维导图"],
       id: "markmap",
-      html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconImage"></use></svg><span class="b3-list-item__text">Mark Map</span></div>`,
+      html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconImage"></use></svg><span class="b3-list-item__text">MarkMap</span></div>`,
       callback: (_protyle, nodeElement) => {
         this.newMarkmapImage(nodeElement.dataset.nodeId, (imageInfo) => {
           // 始终使用 dialog 弹窗进行编辑（移除 tab/dialog 配置选择）
